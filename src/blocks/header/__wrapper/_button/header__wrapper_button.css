@@ -1,0 +1,17 @@
+.header__wrapper_button {
+    font-family: Inter, sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: right;
+    color: #FFFFFF;
+    cursor: pointer;
+    border:none;
+    background: #000000;
+    margin-left: 24px;
+}
+
+.header__wrapper_button:hover {
+    opacity: 0.6;
+}

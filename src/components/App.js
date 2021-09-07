@@ -1,4 +1,4 @@
-import Header from "./Header";
+
 import Main from "./Main";
 import Footer from "./Footer";
 import {useEffect, useState} from "react";
@@ -8,8 +8,15 @@ import {CurrentUserContext} from "../contexts/CurrentUserContext";
 import EditProfilePopup from "./EditProfilePopup";
 import EditAvatarPopup from "./EditAvatarPopup";
 import AddPlacePopup from "./AddPlacePopup";
-import {Spinner} from "./Spinner";
 import PopupWithSubmit from "./PopupWithSubmit";
+import ProtectedRoute from "./ProtectedRoute";
+import {Route, Switch, Redirect, useHistory} from 'react-router-dom';
+import Login from "./Login";
+import Register from "./Register";
+import * as auth from "../utils/auth";
+import SuccessPopup from "./SuccessPopup";
+import FailPopup from "./FailPopup";
+
 
 
 function App() {
@@ -24,7 +31,13 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
-  const [loadingBtn, setLoadingBtn] = useState(false)
+  const [loadingBtn, setLoadingBtn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState(null);
+  const [successPopupOpen, setSuccessPopupOpen] = useState(false);
+  const [failPopupOpen, setFailPopupOpen] = useState(false);
+
+  const history = useHistory()
 
 
   useEffect(() => {
@@ -57,6 +70,24 @@ function App() {
     }).catch((err) => {
       console.log(err);
     })
+  }
+
+  useEffect(() => {
+      handleTokenCheck()
+  }, [handleTokenCheck]);
+
+
+  function handleTokenCheck() {
+    if (localStorage.getItem('jwt')) {
+      const jwt = localStorage.getItem('jwt');
+      auth.checkToken(jwt).then((res) => {
+        if (res) {
+          setCurrentEmail(res.data.email)
+          setLoggedIn(true)
+          history.push("/");
+        }
+      });
+    }
   }
 
   function handleCardDelete(card) {
@@ -96,6 +127,8 @@ function App() {
     setIsEditAvatarPopupOpen(false)
     setPopupWithSubmitOpen(false)
     setSelectedCard(null)
+    setSuccessPopupOpen(false)
+    setFailPopupOpen(false)
   }
 
   function handleCardClick(card) {
@@ -143,6 +176,12 @@ function App() {
         <div className="App">
           <div className="page">
             <div className="page__wrapper">
+              <SuccessPopup onClose={closeAllPopups}
+                            isOpen={successPopupOpen}
+              />
+              <FailPopup onClose={closeAllPopups}
+                            isOpen={failPopupOpen}
+              />
               <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
               <EditProfilePopup isOpen={isEditProfilePopupOpen}
                                 onUpdateUser={handleUpdateUser}
@@ -163,15 +202,33 @@ function App() {
                                cardToDelete={cardToDelete}
                                loadingBtn={loadingBtn}/>
 
-              <Header/>
-              {isLoading || isLoadingCards ? (<Spinner/>) :
-                  (<Main onEditProfile={handleEditProfileClick}
-                         onAddPlace={handleAddPlaceClick}
-                         onEditAvatar={handleEditAvatarClick}
-                         onCardClick={handleCardClick}
-                         cards={cards}
-                         onCardLike={handleCardLike}
-                         onCardDelete={handleCardDelete}/>)}
+              <Switch>
+                <ProtectedRoute exact path="/" loggedIn={loggedIn}
+                                onEditProfile={handleEditProfileClick}
+                                onAddPlace={handleAddPlaceClick}
+                                onEditAvatar={handleEditAvatarClick}
+                                onCardClick={handleCardClick}
+                                cards={cards}
+                                onCardLike={handleCardLike}
+                                onCardDelete={handleCardDelete}
+                                isLoading={isLoading}
+                                isLoadingCards={isLoadingCards}
+                                currentEmail={currentEmail}
+                                component={Main}/>
+
+                <Route path="/sing-in">
+                  <Login setLoggedIn={setLoggedIn}
+                         setFailPopupOpen={setFailPopupOpen}/>
+                </Route>
+                <Route path="/sing-up">
+                  <Register setSuccessPopupOpen={setSuccessPopupOpen}
+                            setFailPopupOpen={setFailPopupOpen}
+                            />
+                </Route>
+                <Route exact path="/">
+                  {loggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
+                </Route>
+              </Switch>
               <Footer/>
             </div>
           </div>
