@@ -6,3 +6,9 @@
     margin: 60px auto 30px;
 
 }
+
+@media (max-width: 597px) {
+    .success__popup_wrapper {
+        width: 280px;
+    }
+}

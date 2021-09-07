@@ -17,3 +17,11 @@
 .log__in_button:hover {
     opacity: 0.85;
 }
+
+@media (max-width: 390px) {
+    .log__in_button {
+        width: 260px;
+        font-size: 16px;
+        line-height: 19px;
+    }
+}

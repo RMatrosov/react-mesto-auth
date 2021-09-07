@@ -13,3 +13,9 @@
     padding-bottom: 13px;
     outline:none
 }
+
+@media (max-width: 390px) {
+    .log__in_input {
+        width: 260px;
+    }
+}
