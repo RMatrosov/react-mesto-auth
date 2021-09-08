@@ -18,13 +18,13 @@ const Register = ({handleRegister}) => {
           <h4 className='log__in_title'>Регистрация</h4>
           <input type="email" className="log__in_input"
                  name='name' placeholder='Email'
-                 minLength="2" defaultValue={email || ''}
+                 minLength="2" value={email || ''}
                  onChange={(e) => setEmail(e.target.value)}
                  maxLength="40" required/>
 
           <input type="password" className="log__in_input"
                  name='password' placeholder='Пароль'
-                 minLength="2" defaultValue={password || ''}
+                 minLength="2" value={password || ''}
                  onChange={(e) => setPassword(e.target.value)}
                  maxLength="200" required/>
 

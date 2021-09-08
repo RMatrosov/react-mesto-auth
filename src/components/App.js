@@ -31,7 +31,7 @@ function App() {
   const [cardToDelete, setCardToDelete] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [currentEmail, setCurrentEmail] = useState(null);
+  const [currentEmail, setCurrentEmail] = useState('');
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [failPopupOpen, setFailPopupOpen] = useState(false);
 
@@ -64,6 +64,7 @@ function App() {
     })
   }
 
+
   useEffect(() => {
     if (localStorage.getItem('jwt')) {
       const jwt = localStorage.getItem('jwt');
@@ -75,6 +76,7 @@ function App() {
         }
       });
     }
+
   }, [history]);
 
   function handleCardDelete(card) {
@@ -160,6 +162,7 @@ function App() {
     auth.authorize(email, password).then((data) => {
       if (data.token) {
         setLoggedIn(true)
+        setCurrentEmail(email)
         history.push('/')
       }
     }).catch((err) => {
@@ -171,7 +174,7 @@ function App() {
   function handleRegister(email, password) {
     auth.register(email, password).then((response) => {
       setSuccessPopupOpen(true)
-      history.push('/sing-in')
+      history.push('/sign-in')
     }).catch((err) => {
       console.log(err)
       setFailPopupOpen(true)
@@ -179,16 +182,12 @@ function App() {
     })
   }
 
-  function signOut(e) {
-    if (e === 'Регистрация') {
-      history.push('/sign-up');
-    } else if (e === 'Войти') {
-      history.push('/sign-in');
-    } else if (e === 'Выйти') {
-      localStorage.removeItem('jwt');
-      history.push('/sign-in');
-      setLoggedIn(false)
-    }
+  function signOut() {
+    localStorage.removeItem('jwt');
+    history.push('/sign-in');
+    setLoggedIn(false)
+    setCurrentEmail('')
+
   }
 
   return (
@@ -233,8 +232,6 @@ function App() {
                                 onCardLike={handleCardLike}
                                 onCardDelete={handleCardDelete}
                                 isLoading={isLoading}
-                                currentEmail={currentEmail}
-                                signOut={signOut}
                                 component={Main}/>
 
                 <Route path="/sign-in">
