@@ -2,38 +2,27 @@ import Card from "./Card";
 import React from "react";
 import {CurrentUserContext} from "../contexts/CurrentUserContext";
 import {Spinner} from "./Spinner";
-import Header from "./Header";
-import {useHistory} from "react-router-dom";
+
+
 
 
 export default function Main({
                                onCardClick, onAddPlace, onEditProfile, onEditAvatar, cards,
-                               onCardLike, onCardDelete, isLoading, isLoadingCards,currentEmail
+                               onCardLike, onCardDelete, isLoading
                              }) {
 
   const currentUser = React.useContext(CurrentUserContext);
 
-  const buttonText = 'Выйти'
-
-  const history = useHistory();
-
-  function signOut() {
-    localStorage.removeItem('jwt');
-    history.push('/sing-in');
-  }
-
   return (
-      <>
-        <Header buttonText={buttonText} signOut={signOut} currentEmail={currentEmail}/>
         <main className="main">
-          {isLoading || isLoadingCards ? (<Spinner/>) :
+          {isLoading ? (<Spinner/>) :
               (<>
                 <section className="profile">
                   <div className="profile__wrapper">
                     <div className="profile__image-wrapper">
-                      <img src={currentUser.avatar} alt="фото профиля"
+                      <img onClick={onEditAvatar} src={currentUser.avatar} alt="фото профиля"
                            className="profile__image"/>
-                      <button onClick={onEditAvatar} className="profile__image-btn"/>
+                      <button  className="profile__image-btn"/>
                     </div>
                     <div className="profile__info">
                       <h1 className="profile__name">{currentUser.name}</h1>
@@ -56,6 +45,5 @@ export default function Main({
                 </section>
               </>)}
         </main>
-      </>
   )
 }

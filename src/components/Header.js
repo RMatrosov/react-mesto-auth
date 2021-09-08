@@ -1,17 +1,21 @@
+import {Route, Switch} from "react-router-dom";
+import HeaderElement from "./HeaderElement";
 
-export default function Header({buttonText, signOut,currentEmail}) {
+export default function Header({signOut, currentEmail}) {
 
 
-    return (
-
-        <header className="header">
-            <a href="#" target="_blank" className="logo"/>
-          <div className='header__wrapper'>
-            {currentEmail && <p className='header__wrapper_email'>{currentEmail}</p>}
-            <button className='header__wrapper_button' onClick={signOut} >{buttonText}</button>
-          </div>
-        </header>
-
-    )
+  return (
+      <Switch>
+        <Route exact path='/'>
+          <HeaderElement signOut={signOut} currentEmail={currentEmail} buttonText={'Выйти'}/>
+        </Route>
+        <Route exact path='/sign-up'>
+          <HeaderElement signOut={signOut} buttonText={'Войти'}/>
+        </Route>
+        <Route exact path='/sign-in'>
+          <HeaderElement signOut={signOut} buttonText={'Регистрация'}/>
+        </Route>
+      </Switch>
+  )
 }
 

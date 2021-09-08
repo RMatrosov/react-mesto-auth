@@ -1,4 +1,3 @@
-
 import Main from "./Main";
 import Footer from "./Footer";
 import {useEffect, useState} from "react";
@@ -16,7 +15,7 @@ import Register from "./Register";
 import * as auth from "../utils/auth";
 import SuccessPopup from "./SuccessPopup";
 import FailPopup from "./FailPopup";
-
+import Header from "./Header";
 
 
 function App() {
@@ -29,7 +28,6 @@ function App() {
   const [cards, setCards] = useState([])
   const [currentUser, setCurrentUser] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -39,28 +37,22 @@ function App() {
 
   const history = useHistory()
 
-
-  useEffect(() => {
-    setIsLoadingCards(true)
-    api.getInitialCards().then(data => {
-      setCards(data)
-    }).catch((error) => {
-      console.log(error)
-    }).finally(() => {
-      setIsLoadingCards(false)
-    })
-  }, [])
-
   useEffect(() => {
     setIsLoading(true)
-    api.getUserInfoFromServer().then(data => {
-      setCurrentUser(data)
-    }).catch((error) => {
+    let getInitialCard = api.getInitialCards()
+    let getUserInfoFromServer = api.getUserInfoFromServer()
+
+    Promise.all([getInitialCard, getUserInfoFromServer])
+        .then(([cardData, userData]) => {
+          setCards(cardData)
+          setCurrentUser(userData)
+        }).catch((error) => {
       console.log(error)
     }).finally(() => {
       setIsLoading(false)
     })
-  }, [])
+
+  }, []);
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -73,11 +65,6 @@ function App() {
   }
 
   useEffect(() => {
-      handleTokenCheck()
-  }, [handleTokenCheck]);
-
-
-  function handleTokenCheck() {
     if (localStorage.getItem('jwt')) {
       const jwt = localStorage.getItem('jwt');
       auth.checkToken(jwt).then((res) => {
@@ -88,7 +75,7 @@ function App() {
         }
       });
     }
-  }
+  }, [history]);
 
   function handleCardDelete(card) {
     setPopupWithSubmitOpen(true);
@@ -101,10 +88,10 @@ function App() {
       if (data.message === "Пост удалён") {
         setCards((state) => state.filter(item => item !== card));
         setPopupWithSubmitOpen(false);
-        setLoadingBtn(false)
       }
     }).catch((err) => {
       console.log(err);
+    }).finally(() => {
       setLoadingBtn(false)
     })
   }
@@ -140,7 +127,6 @@ function App() {
     api.setUserInfoFromServer({name, about}).then(data => {
       setCurrentUser(data);
       closeAllPopups();
-      setLoadingBtn(false)
     }).catch((err) => {
       console.log(err);
       setLoadingBtn(false)
@@ -152,7 +138,6 @@ function App() {
     api.changeAvatar(link).then(data => {
       setCurrentUser(data);
       closeAllPopups();
-      setLoadingBtn(false)
     }).catch((err) => {
       console.log(err);
       setLoadingBtn(false)
@@ -171,6 +156,41 @@ function App() {
     })
   }
 
+  function handleAuthorize(email, password) {
+    auth.authorize(email, password).then((data) => {
+      if (data.token) {
+        setLoggedIn(true)
+        history.push('/')
+      }
+    }).catch((err) => {
+      setFailPopupOpen(true)
+      console.log(err)
+    });
+  }
+
+  function handleRegister(email, password) {
+    auth.register(email, password).then((response) => {
+      setSuccessPopupOpen(true)
+      history.push('/sing-in')
+    }).catch((err) => {
+      console.log(err)
+      setFailPopupOpen(true)
+
+    })
+  }
+
+  function signOut(e) {
+    if (e === 'Регистрация') {
+      history.push('/sign-up');
+    } else if (e === 'Войти') {
+      history.push('/sign-in');
+    } else if (e === 'Выйти') {
+      localStorage.removeItem('jwt');
+      history.push('/sign-in');
+      setLoggedIn(false)
+    }
+  }
+
   return (
       <CurrentUserContext.Provider value={currentUser}>
         <div className="App">
@@ -180,7 +200,7 @@ function App() {
                             isOpen={successPopupOpen}
               />
               <FailPopup onClose={closeAllPopups}
-                            isOpen={failPopupOpen}
+                         isOpen={failPopupOpen}
               />
               <ImagePopup card={selectedCard} onClose={closeAllPopups}/>
               <EditProfilePopup isOpen={isEditProfilePopupOpen}
@@ -201,7 +221,8 @@ function App() {
                                onSubmit={handleCardDeleteSubmit}
                                cardToDelete={cardToDelete}
                                loadingBtn={loadingBtn}/>
-
+              <Header currentEmail={currentEmail}
+                      signOut={signOut}/>
               <Switch>
                 <ProtectedRoute exact path="/" loggedIn={loggedIn}
                                 onEditProfile={handleEditProfileClick}
@@ -212,20 +233,17 @@ function App() {
                                 onCardLike={handleCardLike}
                                 onCardDelete={handleCardDelete}
                                 isLoading={isLoading}
-                                isLoadingCards={isLoadingCards}
                                 currentEmail={currentEmail}
+                                signOut={signOut}
                                 component={Main}/>
 
-                <Route path="/sing-in">
-                  <Login setLoggedIn={setLoggedIn}
-                         setFailPopupOpen={setFailPopupOpen}/>
+                <Route path="/sign-in">
+                  <Login handleAuthorize={handleAuthorize}/>
                 </Route>
-                <Route path="/sing-up">
-                  <Register setSuccessPopupOpen={setSuccessPopupOpen}
-                            setFailPopupOpen={setFailPopupOpen}
-                            />
+                <Route path="/sign-up">
+                  <Register handleRegister={handleRegister}/>
                 </Route>
-                <Route exact path="/">
+                <Route path="/">
                   {loggedIn ? <Redirect to="/"/> : <Redirect to="/sign-in"/>}
                 </Route>
               </Switch>

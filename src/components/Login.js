@@ -1,42 +1,21 @@
 import {useState} from "react";
-import * as auth from "../utils/auth";
-import {useHistory} from "react-router-dom";
-import Header from "./Header";
 
 
-const Login = ({setLoggedIn, setFailPopupOpen}) => {
+const Login = ({handleAuthorize}) => {
 
-  let history = useHistory();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   function handleSubmit(e) {
     e.preventDefault()
-
-    auth.authorize(email, password).then((data) => {
-      if (data.token) {
-        setEmail('')
-        setPassword('')
-        setLoggedIn(true)
-        history.push('/')
-      }
-    })
-        .catch((err) => {
-          setFailPopupOpen(true)
-          console.log(err)
-        });
+    handleAuthorize(email, password)
+    setEmail('')
+    setPassword('')
   }
 
-  const buttonText = 'Регистрация'
-
-  function signOut() {
-    history.push('/sing-up');
-  }
 
   return (
-      <>
-        <Header buttonText={buttonText} signOut={signOut}/>
         <form onSubmit={handleSubmit} className='log__in_wrapper'>
           <h4 className='log__in_title'>Вход</h4>
           <input type="email" className="log__in_input"
@@ -53,7 +32,6 @@ const Login = ({setLoggedIn, setFailPopupOpen}) => {
 
           <button type='submit' className='log__in_button'>Войти</button>
         </form>
-      </>
   )
 }
 

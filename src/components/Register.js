@@ -1,37 +1,19 @@
 import {useState} from "react";
-import * as auth from "../utils/auth";
-import {useHistory} from "react-router-dom";
-import Header from "./Header";
+import {Link} from "react-router-dom";
 
-const Register = ({ setSuccessPopupOpen, setFailPopupOpen}) => {
 
-  let history = useHistory();
+const Register = ({handleRegister}) => {
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   function handleSubmit(e) {
     e.preventDefault();
-
-    auth.register(email, password).then((response) => {
-      if (response.statusCode !== 400) {
-        setSuccessPopupOpen(true)
-        history.push('/sing-in')
-      } else {
-        setFailPopupOpen(true)
-      }
-    })
-  }
-
-  const buttonText = 'Войти'
-
-  function signOut() {
-    history.push('/sing-in');
+    handleRegister(email, password)
   }
 
   return (
-      <>
-        <Header buttonText={buttonText} signOut={signOut}/>
         <form onSubmit={handleSubmit} className='log__in_wrapper'>
           <h4 className='log__in_title'>Регистрация</h4>
           <input type="email" className="log__in_input"
@@ -48,10 +30,11 @@ const Register = ({ setSuccessPopupOpen, setFailPopupOpen}) => {
 
           <button type='submit' className='log__in_button'>Зарегистрироваться</button>
           <p className='login__form_button-text'>Уже зарегистрированы?
-            <button onClick={signOut} className='login__form_button'> Войти</button>
+            <Link to='/sign-in'>
+              <button className='login__form_button'> Войти</button>
+            </Link>
           </p>
         </form>
-      </>
   )
 }
 

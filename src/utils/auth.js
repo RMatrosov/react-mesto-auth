@@ -12,12 +12,7 @@ export const register = (email, password) => {
       email: email
     })
   })
-      .then((response => {
-        return response.json();
-      })).then((res) => {
-        return res;
-      })
-      .catch(err => console.log(err))
+      .then((response) => handleResponse(response)).then(data => data);
 };
 export const authorize = (email, password) => {
   return fetch(`${BASE_URL}/signin`, {
@@ -31,7 +26,7 @@ export const authorize = (email, password) => {
       email: email
     })
   })
-      .then((response => response.json()))
+      .then((response) => handleResponse(response))
       .then((data) => {
         if (data.token) {
           localStorage.setItem('jwt', data.token);
@@ -39,7 +34,6 @@ export const authorize = (email, password) => {
           return data;
         }
       })
-      .catch(err => console.log(err))
 };
 export const checkToken = (token) => {
   return fetch(`${BASE_URL}/users/me`, {
@@ -49,7 +43,12 @@ export const checkToken = (token) => {
       'Authorization': `Bearer ${token}`,
     }
   })
-      .then(res => res.json())
-      .then(data => data)
-      .catch(err => console.log(err))
+      .then((response) => handleResponse(response)).then(data => data);
 }
+
+function handleResponse(res) {
+  if (res.ok) {
+    return res.json();
+  }
+  return Promise.reject(`Ошибка: ${res.status}`);
+};

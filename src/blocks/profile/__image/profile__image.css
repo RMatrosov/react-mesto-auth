@@ -4,6 +4,7 @@
     border-radius: 50%;
     object-fit: cover;
     display: block;
+    cursor: pointer;
 }
 
 @media (max-width: 805px) {
